@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>판 댓글 한눈에 — 네이트판 데모</title>
+<style>
+  :root { --g:#78BE20; --gt:#44700F; --r:#C81618; --ink:#333; --ink2:#69696E; --line:#e3e3e6; --bg:#EEEEF0; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Malgun Gothic",sans-serif; letter-spacing:-1px; color:var(--ink); background:var(--bg); }
+  header { background:#fff; border-bottom:3px solid var(--g); padding:10px 16px; display:flex; gap:10px; align-items:baseline; }
+  header b { color:var(--gt); font-size:22px; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  .panel { background:#fff; border:1px solid var(--line); padding:16px; margin-bottom:14px; }
+  h1 { font-size:22px; letter-spacing:-2px; margin:0 0 6px; }
+  .meta { color:var(--ink2); font-size:13px; }
+  .digest h2 { font-size:17px; margin:0 0 4px; letter-spacing:-1.5px; }
+  .digest .sub { color:var(--ink2); font-size:13px; margin-bottom:12px; }
+  .bar { display:flex; height:10px; margin-bottom:12px; }
+  .bar span { display:block; height:100%; }
+  .cl { border-top:1px solid var(--line); padding:10px 0; }
+  .cl-head { display:flex; justify-content:space-between; gap:8px; font-weight:bold; }
+  .cl-head .n { color:var(--ink2); font-weight:normal; font-size:13px; white-space:nowrap; }
+  .tag { display:inline-block; font-size:11px; padding:1px 5px; margin-left:6px; border:1px solid var(--r); color:var(--r); font-weight:normal; vertical-align:2px; }
+  .rep { margin:6px 0 4px; padding-left:10px; border-left:3px solid var(--line); font-size:14px; }
+  .jump { font-size:13px; color:var(--gt); background:none; border:0; padding:0; cursor:pointer; font-family:inherit; letter-spacing:-1px; }
+  .jump:hover { text-decoration:underline; }
+  .toggle { font-size:13px; margin-top:6px; }
+  .stat { display:flex; gap:16px; font-size:13px; color:var(--ink2); margin-top:10px; border-top:1px dashed var(--line); padding-top:8px; flex-wrap:wrap; }
+  .stat b { color:var(--gt); font-size:16px; }
+  .c { padding:9px 0; border-top:1px solid var(--line); font-size:14px; transition:background .6s; }
+  .c .who { color:var(--ink2); font-size:12px; }
+  .c .like { color:var(--r); font-size:12px; margin-left:6px; }
+  .c.hit { background:#f0f8e4; }
+  .c .chip { font-size:11px; color:var(--ink2); border:1px solid var(--line); padding:0 4px; margin-left:6px; }
+  .note { font-size:12px; color:var(--ink2); }
+</style>
+</head>
+<body>
+<header><b>n</b> 판 <span class="meta">네이트판 댓글 요약 프로토타입 · ncareers 아레나 출품 데모</span></header>
+<main>
+  <article class="panel">
+    <h1>남친이 제 생일에 자기 친구들을 다 불렀어요</h1>
+    <div class="meta">톡톡 &gt; 연애 · 조회 48,210 · 추천 1,204 · 댓글 <span id="total"></span></div>
+    <p>둘이 조용히 저녁 먹기로 했는데 식당에 가 보니 남친 친구 다섯 명이 와 있었어요. 서프라이즈라고 하는데 저는 그 친구들이랑 별로 안 친하고, 계산도 결국 반반 했어요. 제가 예민한 건가요?</p>
+  </article>
+
+  <section class="panel digest" id="digest">
+    <h2>댓글 <span id="total2"></span>개, 이렇게 갈렸어요</h2>
+    <div class="sub">추천순 베플만이 아니라 의견 묶음마다 대표 댓글 하나씩. 적은 쪽 의견도 같은 크기로 보여 줍니다.</div>
+    <div class="bar" id="bar"></div>
+    <div id="clusters"></div>
+    <div class="stat" id="stat"></div>
+    <div class="note">묶음은 이 페이지 안에서 댓글 문장의 표현을 보고 나눕니다(서버 호출 없음). 대표 댓글은 그 묶음에서 추천이 가장 많은 댓글이며, 문장을 고쳐 쓰지 않고 원문 그대로 보여 줍니다.</div>
+  </section>
+
+  <section class="panel" id="list">
+    <div class="meta" style="margin-bottom:6px">전체 댓글 (최신순)</div>
+  </section>
+</main>
+<script>
+// ---- 샘플 타래: 묶음별 표현 조각을 섞어 실제 판 말투로 만든다 ----
+const SEED = {
+  side_op: { chip: "글쓴이 편", label: "글쓴이가 맞다 — 둘이 약속한 날", color: "#78BE20",
+    keys: ["약속","둘이","배려","주인공","서운"],
+    lines: ["생일인데 둘이 먹기로 한 약속을 깬 게 문제임","생일 주인공이 불편하면 그건 서프라이즈가 아니라 남친 이벤트지","서운한 거 당연함 ㅇㅇ 배려가 없음","님 하나도 안 예민함. 둘이 약속한 날이잖아요","친하지도 않은 사람들 사이에 생일 주인공을 앉혀 놓는 건 배려가 아님","저였으면 그 자리에서 나왔을 듯. 생일 주인공이 왜 눈치를 봐요"] },
+  money: { chip: "계산 문제", label: "반반 계산이 더 문제", color: "#FF2C2E",
+    keys: ["계산","반반","돈","더치","밥값","생일자"],
+    lines: ["다른 건 몰라도 생일자한테 반반 계산은 선 넘었다","계산 반반에서 할 말을 잃음","친구들 밥값까지 같이 낸 거면 진짜 노답","돈 문제가 핵심임. 생일자가 왜 돈을 내","더치는 평소에나 하는 거지 생일에 반반은 아니죠"] },
+  side_bf: { chip: "남친 의도", label: "남친 의도는 좋았다", color: "#4F7CC2",
+    keys: ["의도","좋은","노력","친해지","소개","준비"],
+    lines: ["남친은 친구들한테 소개하고 싶었던 거 아닐까요 의도는 좋았다고 봄","나름 준비한 건데 표현 방식이 서툴렀던 듯","친해지라고 부른 걸 수도 있어요. 대화로 풀어 보세요","노력은 했잖아요. 방향이 틀렸을 뿐","좋은 뜻이었으면 한 번은 넘어가도 될 듯"] },
+  talk: { chip: "대화해라", label: "헤어질 일은 아니고 얘기해 봐라", color: "#B08A2E",
+    keys: ["대화","얘기","말해","다음","넘어"],
+    lines: ["헤어질 일까진 아니고 솔직하게 말해 보세요","다음 생일엔 둘이 보자고 미리 얘기하면 될 일","서운했다고 말하고 반응 보면 답 나옴","대화로 넘어갈 수 있는 수준이라고 봄"] },
+  op_wrong: { chip: "예민하다", label: "글쓴이가 예민하다 (소수)", color: "#8D939D",
+    keys: ["예민","오바","별일","유난"],
+    lines: ["솔직히 좀 예민한 듯. 친구들도 축하해 주러 온 거잖아","이게 판에 올릴 별일인가","생일 축하 많이 받으면 좋은 거 아님? 유난이다"] },
+};
+const NICKS = ["ㅇㅇ","판녀","지나가던","퇴근하고싶다","ㅋㅋ","익명","아기고양이","현실조언","새벽감성","직장인3년차","연애고수","하하"];
+let s = 7; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+const TAILS = ["", "", " ㅋㅋ", " ㄹㅇ", "...", " 진심", " 222", " 이거 맞음"];
+const WEIGHT = { side_op: 44, money: 26, side_bf: 18, talk: 12, op_wrong: 7 };
+const comments = [];
+for (const [k, n] of Object.entries(WEIGHT)) {
+  for (let i = 0; i < n; i++) {
+    const L = SEED[k].lines;
+    comments.push({
+      truth: k,
+      who: NICKS[Math.floor(rnd() * NICKS.length)],
+      body: L[Math.floor(rnd() * L.length)] + TAILS[Math.floor(rnd() * TAILS.length)],
+      like: Math.floor(Math.pow(rnd(), 3) * (k === "op_wrong" ? 120 : 900)),
+    });
+  }
+}
+// 섞기 (실제 타래처럼 의견이 뒤섞여 있다)
+for (let i = comments.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [comments[i], comments[j]] = [comments[j], comments[i]]; }
+comments.forEach((c, i) => (c.id = "c" + (i + 1)));
+
+// ---- 묶기: 정답 라벨을 쓰지 않고 문장 표현만 보고 다시 나눈다 ----
+function classify(text) {
+  let best = null, bestHits = 0;
+  for (const [k, v] of Object.entries(SEED)) {
+    const hits = v.keys.reduce((a, w) => a + (text.includes(w) ? 1 : 0), 0);
+    if (hits > bestHits) { best = k; bestHits = hits; }
+  }
+  return best ?? "etc";
+}
+const groups = {};
+for (const c of comments) { c.group = classify(c.body); (groups[c.group] ??= []).push(c); }
+
+// ---- 그리기 ----
+const total = comments.length;
+document.getElementById("total").textContent = total;
+document.getElementById("total2").textContent = total;
+const order = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+const bar = document.getElementById("bar"), box = document.getElementById("clusters");
+const MINOR = 0.12;
+for (const k of order) {
+  const g = groups[k], info = SEED[k] ?? { label: "기타", color: "#ccc" };
+  const share = g.length / total;
+  const sp = document.createElement("span"); sp.style.width = share * 100 + "%"; sp.style.background = info.color; sp.title = info.label;
+  bar.appendChild(sp);
+  const byLike = [...g].sort((a, b) => b.like - a.like);
+  const el = document.createElement("div"); el.className = "cl";
+  el.innerHTML = `<div class="cl-head"><span><span style="color:${info.color}">■</span> ${info.label}${share < MINOR ? '<span class="tag">적은 의견</span>' : ""}</span><span class="n">${g.length}개 · ${Math.round(share * 100)}%</span></div>`;
+  const rep = document.createElement("div"); rep.className = "rep";
+  rep.textContent = `“${byLike[0].body}” — ${byLike[0].who} · 추천 ${byLike[0].like}`;
+  el.appendChild(rep);
+  const jump = document.createElement("button"); jump.className = "jump"; jump.textContent = "원 댓글로 가기 ↓";
+  jump.onclick = () => go(byLike[0].id); el.appendChild(jump);
+  const more = document.createElement("div"); more.className = "toggle";
+  const btn = document.createElement("button"); btn.className = "jump"; btn.textContent = `이 의견 댓글 ${g.length}개 차례로 보기`;
+  let idx = 0; btn.onclick = () => { go(byLike[idx % byLike.length].id); idx++; btn.textContent = `다음 (${(idx % byLike.length) + 1}/${byLike.length})`; };
+  more.appendChild(btn); el.appendChild(more);
+  box.appendChild(el);
+}
+const list = document.getElementById("list");
+for (const c of comments) {
+  const d = document.createElement("div"); d.className = "c"; d.id = c.id;
+  const label = (SEED[c.group] ?? { chip: "기타" }).chip;
+  d.innerHTML = `<div class="who">${c.who}<span class="like">추천 ${c.like}</span><span class="chip">${label}</span></div>`;
+  const p = document.createElement("div"); p.textContent = c.body; d.appendChild(p);
+  list.appendChild(d);
+}
+function go(id) {
+  const el = document.getElementById(id);
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("hit"); setTimeout(() => el.classList.remove("hit"), 1800);
+}
+
+// ---- 실측: 이 화면에서 직접 잰 값 ----
+requestAnimationFrame(() => {
+  const listH = list.offsetHeight, digH = document.getElementById("digest").offsetHeight;
+  const top3 = [...comments].sort((a, b) => b.like - a.like).slice(0, 3);
+  const top3Groups = new Set(top3.map((c) => c.group)).size;
+  const correct = comments.filter((c) => c.group === c.truth).length;
+  const minorTruth = comments.filter((c) => c.truth === "op_wrong");
+  const minorKept = minorTruth.filter((c) => c.group === "op_wrong").length;
+  document.getElementById("stat").innerHTML =
+    `<span>전체 댓글 높이 <b>${listH.toLocaleString()}px</b> → 요약 <b>${digH.toLocaleString()}px</b> (${Math.round((1 - digH / listH) * 100)}% 덜 내림)</span>` +
+    `<span>추천순 베플 3개가 담는 의견 <b>${top3Groups}/${order.length}</b> → 요약 <b>${order.length}/${order.length}</b></span>` +
+    `<span>묶음 정확도 <b>${correct}/${total}</b> (${Math.round((correct / total) * 100)}%) · 소수 의견 보존 <b>${minorKept}/${minorTruth.length}</b></span>`;
+});
+</script>
+</body>
+</html>

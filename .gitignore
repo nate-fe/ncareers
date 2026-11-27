@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# 환경변수
+.env
+.env.local
+.env*.local
+
+# 파일 모드 저장소 (BE 쪽에만 생긴다)
+apps/api/data/arena.json
+apps/api/data/outbox.json
+
+# drizzle 마이그레이션 SQL 은 커밋한다

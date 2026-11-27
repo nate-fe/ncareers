@@ -1,0 +1,30 @@
+{
+  "name": "ncareers",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "npm run dev --workspace @ncareers/web",
+    "dev:api": "npm run dev --workspace @ncareers/api",
+    "worker": "npm run worker --workspace @ncareers/api",
+    "build": "npm run build --workspace @ncareers/web",
+    "start:web": "npm run start --workspace @ncareers/web",
+    "start:api": "npm run start --workspace @ncareers/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:push": "npm run db:push --workspace @ncareers/api",
+    "db:generate": "npm run db:generate --workspace @ncareers/api",
+    "db:studio": "npm run db:studio --workspace @ncareers/api",
+    "db:seed": "npm run db:seed --workspace @ncareers/api",
+    "db:reset": "npm run db:reset --workspace @ncareers/api",
+    "reset": "npm run reset --workspace @ncareers/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.7.0"
+  }
+}

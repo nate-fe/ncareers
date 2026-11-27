@@ -1,0 +1,307 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap");
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────
+   테마와 무관한 고정값
+   ─────────────────────────────────────────────────────────── */
+@theme {
+  --color-brand: #78be20; /* 네이트 그린 — 면·게이지·로고 */
+  --color-point: #ff2c2e; /* 포인트 레드 — 1위, LIVE, 경고 */
+  --color-point-text: #ff2c2e; /* 네이트 출제 배지 배경 */
+
+  /* 글자 크기: Tailwind 기본 스케일 +1px */
+  --text-xs: 14px;
+  --text-sm: 16px;
+  --text-base: 18px;
+  --text-lg: 20px;
+  --text-xl: 22px;
+  --text-2xl: 26px;
+  --text-3xl: 32px;
+  --text-4xl: 38px;
+  --text-5xl: 50px;
+  --text-6xl: 62px;
+  --text-7xl: 74px;
+
+  --font-sans: "Nanum Gothic", "나눔고딕", "Malgun Gothic", "맑은 고딕", sans-serif;
+  --font-title: "Pretendard Variable", Pretendard, "Nanum Gothic", sans-serif;
+  --font-code: ui-monospace, SFMono-Regular, Consolas, "D2Coding", monospace;
+}
+
+/* ───────────────────────────────────────────────────────────
+   테마 토큰
+   라이트는 밝은 스코어보드, 다크는 아케이드 캐비닛.
+   다크에서는 #78BE20 이 패널 위 7.77:1 이라 글자로도 그대로 쓴다.
+   ─────────────────────────────────────────────────────────── */
+:root {
+  --bg: #ffffff;
+  --bg-2: #f6f6f7;
+  --panel: #ffffff;
+  --panel-2: #f6f6f8;
+  --line: #d7d7dd;
+  --line-2: #bcbcc5;
+  --text: #333333;
+  --text-2: #4f4f55;
+  --text-3: #69696e;
+  --brand-text: #44700f; /* 밝은 면 위 그린 글자 5.9:1 */
+  --point-text: #c81618; /* 밝은 면 위 레드 글자 5.9:1 */
+  --on-brand: #232326; /* 그린 솔리드 위 글자 7.6:1 */
+  --deep: #232326; /* 반전 면: HUD 바, 코드블록 */
+  --on-deep: #fafafa;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c0d0f;
+    --bg-2: #121316;
+    --panel: #16181c;
+    --panel-2: #1d2025;
+    --line: #2e333b;
+    --line-2: #454b56;
+    --text: #e8e9ec;
+    --text-2: #b4b8c0;
+    --text-3: #8d939d;
+    --brand-text: #96d93a; /* 패널 위 10.4:1 */
+    --point-text: #ff6b6d; /* 패널 위 6.4:1 */
+    --on-brand: #0c0d0f;
+    --deep: #07080a;
+    --on-deep: #e8e9ec;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c0d0f;
+  --bg-2: #121316;
+  --panel: #16181c;
+  --panel-2: #1d2025;
+  --line: #2e333b;
+  --line-2: #454b56;
+  --text: #e8e9ec;
+  --text-2: #b4b8c0;
+  --text-3: #8d939d;
+  --brand-text: #96d93a;
+  --point-text: #ff6b6d;
+  --on-brand: #0c0d0f;
+  --deep: #07080a;
+  --on-deep: #e8e9ec;
+  color-scheme: dark;
+}
+
+/* 위 변수를 Tailwind 색 유틸리티로 넘긴다 */
+@theme inline {
+  --color-paper: var(--bg);
+  --color-paper-2: var(--bg-2);
+  --color-card: var(--panel);
+  --color-card-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-muted: var(--text-3);
+  --color-brand-ink: var(--brand-text);
+  --color-point-ink: var(--point-text);
+  --color-ink-dark: var(--deep);
+  --color-on-deep: var(--on-deep);
+  --color-on-brand: var(--on-brand);
+}
+
+* {
+  word-break: keep-all;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+}
+
+h1 {
+  letter-spacing: -3.5px;
+}
+
+h2 {
+  letter-spacing: -2.5px;
+}
+
+h3 {
+  letter-spacing: -2px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  letter-spacing: -1px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 코드는 자간을 조이면 기호가 붙어 읽히고 줄 정렬이 깨진다 */
+/* 코드 예시만 고정폭을 쓴다. 본문 자간(-1px)도 여기서는 되돌린다. */
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-code);
+  letter-spacing: normal;
+}
+
+/* ───────────────────────────────────────────────────────────
+   HUD 유틸리티
+   ─────────────────────────────────────────────────────────── */
+
+/* 히어로 제목. 영문이 섞이므로 본문 h1(-3.5px)보다 자간을 푼다 */
+.hero-title {
+  letter-spacing: -1.5px;
+}
+
+/*
+ * 히어로 배경. 격자 텍스처 대신 제목 뒤에 아주 옅은 브랜드 빛만 깐다.
+ * 라이트에서는 거의 안 보일 정도, 다크에서는 조금 더 올린다.
+ */
+/*
+ * 히어로 뒤 브랜드 빛.
+ *
+ * 흰 배경(#fff) 위에서는 그린을 옅게 깔면 거의 보이지 않는다 — 8% 는 #F4FAEC 라
+ * 모니터에 따라 아예 안 보였다. 그래서 라이트는 진하게 가되, 한 점에 뭉쳐
+ * 얼룩처럼 보이지 않도록 중간 정지점을 두어 넓게 풀어 놓는다.
+ * 다크는 반대로 조금만 올려도 보이므로 낮게 둔다.
+ */
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 130%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      72% 62% at 0% 0%,
+      color-mix(in srgb, var(--color-brand) 38%, transparent) 0%,
+      color-mix(in srgb, var(--color-brand) 16%, transparent) 40%,
+      transparent 74%
+    ),
+    radial-gradient(
+      60% 80% at 88% 4%,
+      color-mix(in srgb, var(--color-brand) 13%, transparent) 0%,
+      transparent 68%
+    );
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero-glow::before {
+    background: radial-gradient(
+      85% 75% at 6% 10%,
+      color-mix(in srgb, var(--color-brand) 15%, transparent) 0%,
+      transparent 72%
+    );
+  }
+}
+
+:root[data-theme="dark"] .hero-glow::before {
+  background: radial-gradient(
+    85% 75% at 6% 10%,
+    color-mix(in srgb, var(--color-brand) 15%, transparent) 0%,
+    transparent 72%
+  );
+}
+
+/* 스크롤 후 헤더. 라이트에서는 흰 유리, 다크에서는 어두운 유리 */
+.header-frost {
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* 섹션 제목 앞에 붙는 브랜드 바 */
+.section-title::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 5px;
+  margin-bottom: 18px;
+  background: var(--color-brand);
+}
+
+/* 각진 패널 + 좌상·우하 코너 브래킷 */
+.panel-cut {
+  position: relative;
+}
+
+.panel-cut::before,
+.panel-cut::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--color-brand);
+  pointer-events: none;
+}
+
+.panel-cut::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.panel-cut::after {
+  right: -1px;
+  bottom: -1px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+.panel-cut-point::before,
+.panel-cut-point::after {
+  border-color: var(--color-point);
+}
+
+/* 눈금 게이지: 연속 막대 대신 칸으로 끊는다 */
+.seg {
+  background-image: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 7px);
+}
+
+@keyframes pulse-bar {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.bar-lead {
+  animation: pulse-bar 2.4s ease-in-out infinite;
+}
+
+@keyframes blip {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
+
+.live-dot {
+  animation: blip 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-lead,
+  .live-dot {
+    animation: none;
+  }
+}

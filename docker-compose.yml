@@ -1,0 +1,23 @@
+# 로컬 Postgres. Docker 가 있으면 이걸로 충분하다.
+#   docker compose up -d
+#   DATABASE_URL=postgres://arena:arena@localhost:5432/arena?sslmode=disable
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: arena
+      POSTGRES_PASSWORD: arena
+      POSTGRES_DB: arena
+    ports:
+      - "5432:5432"
+    volumes:
+      - arena-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arena -d arena"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  arena-pgdata:
